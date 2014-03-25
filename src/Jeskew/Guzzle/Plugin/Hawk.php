@@ -5,10 +5,11 @@ namespace Jeskew\Guzzle\Plugin;
 
 use Dflydev\Hawk\Client\ClientBuilder;
 use Dflydev\Hawk\Credentials\Credentials;
-use Guzzle\Common\Event;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use GuzzleHttp\Event\BeforeEvent;
+use GuzzleHttp\Event\EmitterInterface;
+use GuzzleHttp\Event\SubscriberInterface;
 
-class Hawk implements EventSubscriberInterface
+class Hawk implements SubscriberInterface
 {
     private $key;
     private $secret;
@@ -21,14 +22,16 @@ class Hawk implements EventSubscriberInterface
         $this->offset = $offset;
     }
 
-    public static function getSubscribedEvents()
+    public function getEvents()
     {
-        return array('request.before_send' => 'signRequest');
+        return [
+            'before' => ['signRequest', 'last'],
+        ];
     }
 
-    public function signRequest(Event $event)
+    public function signRequest(BeforeEvent $event, $name, EmitterInterface $emitter)
     {
-        $request = $event['request'];
+        $request = $event->getRequest();
 
         $hawkRequest = $this->generateHawkRequest(
             $this->key,
