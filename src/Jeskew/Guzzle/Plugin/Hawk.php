@@ -29,7 +29,7 @@ class Hawk implements SubscriberInterface
         ];
     }
 
-    public function signRequest(BeforeEvent $event, $name, EmitterInterface $emitter)
+    public function signRequest(BeforeEvent $event)
     {
         $request = $event->getRequest();
 
