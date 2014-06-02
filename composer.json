@@ -1,11 +1,11 @@
 {
     "name": "jeskew/guzzle-hawk",
     "description": "A GuzzlePHP plugin for Hawk authentication",
-    "version": "0.0.2",
+    "version": "0.1",
     "require": {
         "php": ">=5.4.0",
         "dflydev/hawk": "*",
-        "guzzlehttp/guzzle": "4.*"
+        "guzzlehttp/guzzle": "4.1.*"
     },
     "license": "MIT",
     "authors": [
@@ -14,7 +14,7 @@
             "email": "jonathan@jeskew.net"
         }
     ],
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "autoload": {
         "psr-0": {
             "Jeskew\\Guzzle\\": "src/"
