@@ -47,7 +47,7 @@ class Hawk implements SubscriberInterface
         );
     }
 
-    private function generateHawkRequest(
+    public function generateHawkRequest(
         $key,
         $secret,
         $url,
