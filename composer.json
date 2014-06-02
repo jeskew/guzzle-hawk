@@ -1,7 +1,7 @@
 {
     "name": "jeskew/guzzle-hawk",
     "description": "A GuzzlePHP plugin for Hawk authentication",
-    "version": "0.1",
+    "version": "0.1.2",
     "require": {
         "php": ">=5.4.0",
         "dflydev/hawk": "*",
