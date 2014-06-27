@@ -8,7 +8,7 @@ use Dflydev\Hawk\Credentials\Credentials;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\EmitterInterface;
 use GuzzleHttp\Event\SubscriberInterface;
-use GuzzleHttp\Message\Request;
+use GuzzleHttp\Message\RequestInterface;
 
 class Hawk implements SubscriberInterface
 {
@@ -49,7 +49,7 @@ class Hawk implements SubscriberInterface
             $request->getUrl(),
             $request->getMethod(),
             $this->offset,
-            [],
+            $this->gatherExtHeaders($request),
             $this->parsePayload ? (string) $request->getBody() : '',
             $this->parsePayload ? $request->getHeader('content-type') : ''
         );
@@ -86,9 +86,16 @@ class Hawk implements SubscriberInterface
         return $request;
     }
 
-    private function gatherExtHeaders(Request $request)
+    private function gatherExtHeaders(RequestInterface $request)
     {
-        $headers = $request->getHeaders();
+        $headers = array_intersect_key(
+            $request->getHeaders(),
+            array_flip($this->extHeaders)
+        );
+
+        ksort($headers);
+
+        return $headers;
     }
 
     private function buildClient($offset)
