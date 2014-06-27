@@ -8,18 +8,28 @@ use Dflydev\Hawk\Credentials\Credentials;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\Event\EmitterInterface;
 use GuzzleHttp\Event\SubscriberInterface;
+use GuzzleHttp\Message\Request;
 
 class Hawk implements SubscriberInterface
 {
     private $key;
     private $secret;
     private $offset;
+    private $parsePayload;
+    private $extHeaders;
 
-    public function __construct($key, $secret, $offset = 0)
-    {
+    public function __construct(
+        $key,
+        $secret,
+        $offset = 0,
+        $parsePayload = false,
+        $extHeaders = []
+    ) {
         $this->key = $key;
         $this->secret = $secret;
         $this->offset = $offset;
+        $this->parsePayload = $parsePayload;
+        $this->extHeaders = $extHeaders;
     }
 
     public function getEvents()
@@ -38,7 +48,10 @@ class Hawk implements SubscriberInterface
             $this->secret,
             $request->getUrl(),
             $request->getMethod(),
-            $this->offset
+            $this->offset,
+            [],
+            $this->parsePayload ? (string) $request->getBody() : '',
+            $this->parsePayload ? $request->getHeader('content-type') : ''
         );
 
         $request->setHeader(
@@ -71,6 +84,11 @@ class Hawk implements SubscriberInterface
         );
 
         return $request;
+    }
+
+    private function gatherExtHeaders(Request $request)
+    {
+        $headers = $request->getHeaders();
     }
 
     private function buildClient($offset)
