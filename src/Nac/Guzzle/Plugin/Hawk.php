@@ -6,8 +6,9 @@ namespace Nac\Guzzle\Plugin;
 use Dflydev\Hawk\Client\ClientBuilder;
 use Dflydev\Hawk\Credentials\Credentials;
 use GuzzleHttp\Event\BeforeEvent;
-use GuzzleHttp\Event\EmitterInterface;
+use GuzzleHttp\Event\CompleteEvent;
 use GuzzleHttp\Event\SubscriberInterface;
+use GuzzleHttp\Event\RequestEvents;
 
 class Hawk implements SubscriberInterface
 {
@@ -25,31 +26,46 @@ class Hawk implements SubscriberInterface
     public function getEvents()
     {
         return [
-            'before' => ['signRequest', 'last'],
+            'before' => ['signRequest', RequestEvents::SIGN_REQUEST],
+            'complete' => ['validateResponse', RequestEvents::VERIFY_RESPONSE],
         ];
+    }
+
+    public function validateResponse(CompleteEvent $event)
+    {
+        $response = $event->getResponse();
+
+        $authenticated = $this->client->authenticate(
+            $this->credentials,
+            $this->hawkRequest,
+            $response->getHeader('Server-Authorization'),
+            array(
+                'payload' => $response->getBody(),
+                'content_type' => $response->getHeader('Content-Type'),
+            ));
+
+        $response->authenticated = $authenticated;
     }
 
     public function signRequest(BeforeEvent $event)
     {
         $request = $event->getRequest();
 
-        $hawkRequest = $this->generateHawkRequest(
-            $this->key,
-            $this->secret,
+        $this->credentials = $this->generateCredentials($this->key, $this->secret);
+
+        $this->hawkRequest = $this->generateHawkRequest(
             $request->getUrl(),
             $request->getMethod(),
             $this->offset
         );
 
         $request->setHeader(
-            $hawkRequest->header()->fieldName(),
-            $hawkRequest->header()->fieldValue()
+            $this->hawkRequest->header()->fieldName(),
+            $this->hawkRequest->header()->fieldValue()
         );
     }
 
     public function generateHawkRequest(
-        $key,
-        $secret,
         $url,
         $method = 'GET',
         $offset = 0,
@@ -57,14 +73,12 @@ class Hawk implements SubscriberInterface
         $payload = '',
         $contentType = ''
     ) {
-        $client = $this->buildClient($offset);
-
-        $credentials = $this->generateCredentials($key, $secret);
+        $this->client = $this->buildClient($offset);
 
         $requestOptions = $this->generateRequestOptions($ext, $payload, $contentType);
 
-        $request = $client->createRequest(
-            $credentials,
+        $request = $this->client->createRequest(
+            $this->credentials,
             $url,
             $method,
             $requestOptions
