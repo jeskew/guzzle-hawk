@@ -1,5 +1,5 @@
 {
-    "name": "nac/guzzle-hawk",
+    "name": "jeskew/guzzle-hawk",
     "description": "A GuzzlePHP plugin for Hawk authentication",
     "version": "0.1.2",
     "require": {
@@ -21,7 +21,7 @@
     "minimum-stability": "stable",
     "autoload": {
         "psr-0": {
-            "Nac\\Guzzle\\": "src/"
+            "Jeskew\\Guzzle\\": "src/"
         }
     }
 }

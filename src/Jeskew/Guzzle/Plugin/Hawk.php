@@ -1,6 +1,6 @@
 <?php
 
-namespace Nac\Guzzle\Plugin;
+namespace Jeskew\Guzzle\Plugin;
 
 
 use Dflydev\Hawk\Client\ClientBuilder;
