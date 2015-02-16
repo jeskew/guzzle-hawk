@@ -56,13 +56,27 @@ class Hawk implements SubscriberInterface
         $this->hawkRequest = $this->generateHawkRequest(
             $request->getUrl(),
             $request->getMethod(),
-            $this->offset
+            $this->offset,
+            [],
+            $request->getBody(),
+            $this->extractContentType($request)
         );
 
         $request->setHeader(
             $this->hawkRequest->header()->fieldName(),
             $this->hawkRequest->header()->fieldValue()
         );
+    }
+
+    public function extractContentType($request) {
+        $headers_lower = array_change_key_case($request->getHeaders(), CASE_LOWER);
+
+        if (array_key_exists('content-type', $headers_lower) && \
+                count($headers_lower['content-type'] >= 1)) {
+            return $headers_lower['content-type'][0];
+        }
+
+        return '';
     }
 
     public function generateHawkRequest(
